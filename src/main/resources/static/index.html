@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script  type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.js"></script>
+
+</head>
+<body>
+<h1>{我是首页}-clinet1。</h1>
+<h2 id="welcome"></h2>
+<h3><span id="username"></span>||
+<span id="order"></span>||
+<span><button type="button" onclick="login()">【登录】</button></span>
+||<span><button type="button" onclick="order()">模拟进入其他系统的请求client2，如果没有登录就不能进入</button></span>
+
+</h3>
+
+
+</body>
+
+<script type="text/javascript">
+
+//拿这个token,去查询看是否登录。
+var u_token=$.cookie("u_token");
+
+$(function(){
+	//这里采用注解@CrossOrigin代替jsonp方式跨域请求了
+	$.ajax({
+		url: "http://localhost:8083/user/token/"+u_token,
+		type : "get",
+		async: false,
+		dataType: "json", 
+		success: function(result){
+			if(result.status==200){
+				var html=result.data.username+"，欢迎光临..||"+"<a onclick='logout()' href='#'>[退出]<a>";
+				console.log(result.data.username);
+				$("#welcome").html(html);
+			}
+			if(result.status==400){
+				//alert("需要先登录，才会显示用户名");
+			}
+		},
+		error:function(){
+			console.log("查询出现错误。");
+		}
+	}); 
+});
+
+
+//跳转到验证中心sso,验证。
+function login(){
+	location.href="http://localhost:8083/page/login";
+}
+
+//当没有登录是，会返回现在这个地址
+//获取模拟order信息
+function order(){
+	location.href="http://localhost:8082/order/queryOrder";
+}
+
+function logout(){
+	$.ajax({
+		url: "http://localhost:8083/user/logout/"+u_token,
+		type : "get",
+		async: false,
+		dataType: "json", 
+		success: function(result){
+			location.reload(); 
+		},
+		error:function(){
+			console.log("退出错误。");
+		}
+	}); 
+}
+
+
+//jsonp跨域请求
+/*  function query(){
+	$.ajax({
+		//发送请求如：http://localhost:8082/test3?callback=jsonhandle&_=1567653940291
+		url: "http://localhost:8082/test3",
+		type : "get",
+		async: false,
+		dataType: "jsonp", 
+		jsonp:"callback", //请求php的参数名
+		jsonpCallback: "jsonhandle",//要执行的回调函数(参数值)
+		/*  回调函数会执行，和jsonpCallback的功能相似 */
+		/* success: function(result){
+			console.log(result.id+result.username);
+		},
+		error:function(){
+			console.log("查询出现错误。");
+		}
+	}); 
+ }*/
+ 
+	
+</script>
+
+
+
+
+</html>
+
